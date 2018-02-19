@@ -107,7 +107,7 @@ def calculate_train_error(pre, post):
             error_index.append(i)
 
     print error_index
-    return (k / len(pre)) * 100
+    return (k / float(len(pre))) * 100
 
 def gaussian_nb(data):
 
