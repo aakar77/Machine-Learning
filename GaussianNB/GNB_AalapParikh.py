@@ -1,4 +1,4 @@
-# Author: Aalap Parikh.
+# Author: Aalap Parikh, Aakar Jinwala
 # Date: February 19, 2018.
 
 
@@ -222,7 +222,7 @@ def main():
 
 	print "Cross Validation: class labels for 20, 60, 100, 140, 180: ", predictedClasses[19], predictedClasses[59], predictedClasses[99], predictedClasses[139], predictedClasses[179]
 
-	
+
 	for i in range(1, 200):
 		print str(i) + "," + str(predictedClasses[i-1])
 
