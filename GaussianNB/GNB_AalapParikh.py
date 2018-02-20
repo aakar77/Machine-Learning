@@ -142,6 +142,8 @@ def kFoldCrossValidate(data, k):
 	# Splitting the dataset in k parts.
 	partSize = len(data)/k
 	accuracyList = list()
+	print "Gaussian Naive Bayes:"
+
 	for i in range(0,k):
 
 		train_data = data[0:i*partSize] + data[(i+1)*partSize:]
@@ -156,6 +158,43 @@ def kFoldCrossValidate(data, k):
 	print "Average accuracy from cross validation: ", averageAccuracy
 
 
+	print "\nZero-R:"
+
+	accuracyList = []
+	for i in range(0,k):
+		train_data = data[0:i * partSize] + data[(i + 1) * partSize:]
+		test_data = data[i * partSize:(i + 1) * partSize]
+
+		zero_r_class = zero_R(train_data)
+		accuracy = zero_R_test(test_data, zero_r_class)
+		print "For iteration: ", i + 1, " accuracy = ", accuracy
+		accuracyList.append(accuracy)
+
+	averageAccuracy = reduce(lambda x, y: x + y, accuracyList) / len(accuracyList)
+	print "Average accuracy from cross validation: ", averageAccuracy
+
+def zero_R(data):
+
+	resClass = [i[10] for i in data]
+	count1 = resClass.count('1')
+	count2 = resClass.count('2')
+	if count1 > count2:
+		return '1'
+	else:
+		return '2'
+
+def zero_R_test(data, zero_r_class):
+	resClass = [i[10] for i in data]
+
+	correctPredictions = 0
+
+	for i in resClass:
+		if i == zero_r_class:
+			correctPredictions += 1
+
+	accuracy = float(correctPredictions)/len(resClass)
+	return accuracy
+
 def main():
 	filePath = 'glasshw1.csv'
 	data = readFile(filePath)
@@ -166,6 +205,10 @@ def main():
 	#Test the classifier on the training data.
 	accuracy = testGaussianNB(meanList, stdevList, data)
 	print "Accuracy of Naive Bayes Classifier: ", accuracy
+
+	zero_r_class = zero_R(data)
+	accuracy = zero_R_test(data, zero_r_class)
+	print "Accuracy of Zero-R Classifier: ", accuracy
 
 	print "Enter k for Cross Validation: "
 	k = int(raw_input())
