@@ -1,6 +1,5 @@
 import math
 
-
 # This method reads file
 def read_file(filePath):
     with open(filePath) as f:
@@ -9,28 +8,25 @@ def read_file(filePath):
 
     return data
 
-
 # method for mean for entire column
 def calculate_mean(data):
     mysum = sum(map(float, data))
 
     return mysum / len(data)
 
-
 #  method for variance calculation
 def calculate_var(data, mean):
     sumData = 0
     for x in data:
         sumData += (float(x) - mean) ** 2
-
     return float(sumData) / (len(data) - 1)
-
 
 # method returns std and mean for a dataset
 def calculate_mean_std_of_dataset(data):
     h = dict()
 
     for i in range(1, 10):
+
         # Inserting entire row values in the list
         attrbValue = list()
         attrbValue.append([float(k[i]) for k in data])
@@ -46,19 +42,17 @@ def calculate_mean_std_of_dataset(data):
 
 # log of guassian probability density function for x
 def calculate_log_prob_xi(val, mean, var):
-    print("----> %s ----> %s -----> %s" % (val, mean, var))
-    '''
-    
+
     x = (-0.5) * math.log(2 * math.pi * var)
     y = math.pow((val - mean), 2) / (-2 * var)
 
     return x + y
     '''
-
     x = float(math.pow(val-mean, 2)) / (-2 * var)
     exp_part = float(math.exp(x))
     y = 1 / math.sqrt(2 * math.pi * var)
     return math.log(exp_part * y)
+    '''
 
 def calculate_p_of_class(data, class1_stat, class2_stat, un_pC1, un_pC2):
     prob_list = dict()
@@ -74,14 +68,11 @@ def calculate_p_of_class(data, class1_stat, class2_stat, un_pC1, un_pC2):
         sum_pXi_C1 = float(0)
         sum_pXi_C2 = float(0)
 
-        print "\n"
-        print class1_stat
-        print class2_stat
-        print "\n"
+        #print class1_stat
+        #print class2_stat
 
         for i in range(1, 10):
-            print(i)
-
+            #print(i)
             sum_pXi_C1 += calculate_log_prob_xi(float(row[i]), class1_stat[i][0], class1_stat[i][1])
             sum_pXi_C2 += calculate_log_prob_xi(float(row[i]), class2_stat[i][0], class2_stat[i][1])
 
@@ -103,7 +94,6 @@ def calculate_p_of_class(data, class1_stat, class2_stat, un_pC1, un_pC2):
 
     return prob_list
 
-
 def calculate_train_error(pre, post):
     k = 0
     error_index = []
@@ -112,17 +102,16 @@ def calculate_train_error(pre, post):
 
         if pre[i] != post[i]:
             k += 1
-            error_index.append(i)
-
-    print error_index
+            error_index.append(post)
     return (k / float(len(pre))) * 100
 
 def gaussian_nb(train_data, test_data, prior):
+
     # Divide data into two classes
     class1_data = list()
     class2_data = list()
 
-    for row in test_data:
+    for row in train_data:
         if row[10] == "1":
             class1_data.append(row)
         elif row[10] == "2":
@@ -135,7 +124,6 @@ def gaussian_nb(train_data, test_data, prior):
     # Calculate the Probability of Class, will get a List:
     prob_list = calculate_p_of_class(test_data, class1_stat, class2_stat, prior['1'], prior['2'])
 
-
     print prob_list['pC1']
     print prob_list['pC2']
     print prob_list['Xi1']
@@ -145,8 +133,7 @@ def gaussian_nb(train_data, test_data, prior):
 
     prob_list['train_error'] = calculate_train_error(prob_list['pre'], prob_list['post'])
 
-    print prob_list['train_error']
-
+    return prob_list
 
 def calculate_prior(data):
     resClass = list()
@@ -154,7 +141,7 @@ def calculate_prior(data):
     resClass = resClass[0]
 
     p = dict()
-    N = 200
+    N = len(data)
 
     # unconditional probability for class 1
     p['1'] = float(resClass.count('1')) / N
@@ -164,19 +151,34 @@ def calculate_prior(data):
 
     return p
 
+def k_fold_validation(data, prior, k):
 
-def five_fold_validation(data, prior):
+    error = float(0)
+    final_prediction = {}
 
-
-    for i in range(4,5):
-        x = len(data) / 5
+    # Generating data for k fold and calling Gaussian calculation
+    for i in range(k):
+        x = len(data) / k
         y = x * i
 
-        print(" %s : %s " % (y,y+x))
-
+        #print(" %s : %s " % (y,y+x))
         train_data = data[:y] + data[y+x:]
         test_data = data[y:y+x]
-        gaussian_nb(train_data,test_data, prior)
+        train_error_list = []
+
+        computed_data = gaussian_nb(train_data,test_data, prior)
+
+        j = 0
+        for i in range(y, y+x):
+            try:
+                final_prediction[i] = computed_data['post'][j]
+                print("i = %s : data = %s : j = %s" %(i,computed_data['post'][j], j))
+            except:
+                print("List Error at i = %s j = %s" %(i, j))
+            j = j + 1
+
+        train_error_list.append(computed_data['train_error'])
+        error += computed_data['train_error']
 
 def main():
     filePath = 'glasshw1.csv'
@@ -186,16 +188,10 @@ def main():
     prior = calculate_prior(data)
 
     # sending the same data for test and train for whole 200 entries
-    #gaussian_nb(data, data, prior)
+    all_data = gaussian_nb(data, data, prior)
 
     #five fold validation
-    #five_fold_validation(data, prior)
-
-    #gaussian_nb(data[41:], data[1:40], prior)
-    #gaussian_nb(data[1:40] + data[81:200], data[41:80], prior)
-    #gaussian_nb(data[1:120]+data[161:200], data[121:160], prior)
-    #gaussian_nb(data[1:80] + data[121:], data[81:120], prior)
-    gaussian_nb(data[1:160], data[161:], prior)
+    k_fold_validation(data, prior, 5)
 
 if __name__ == "__main__":
     main()
