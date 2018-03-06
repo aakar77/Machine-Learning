@@ -1,4 +1,4 @@
-# Author: Aalap Parikh.
+# Author: Aalap Parikh, Aakar Jinwala
 # Date: February 19, 2018.
 
 
@@ -28,7 +28,7 @@ def stdev(column, mean):
 	differences = [x - mean for x in column]
 	sq_differences = [d ** 2 for d in differences]
 	ssd = sum(sq_differences)
-	variance = ssd / len(column)
+	variance = ssd / (len(column)-1)
 
 	sd = math.sqrt(variance)
 	return sd
@@ -127,13 +127,12 @@ def testGaussianNB(meanList, stdevList, data):
 
 	#Calculate accuracy:
 	correct_predictions = 0
-
 	for i in range(len(actualResClass)):
 		if(actualResClass[i] == predictedResClass[i]):
 			correct_predictions += 1
 
 	accuracy = (float(correct_predictions)/len(actualResClass))
-	return accuracy
+	return (predictedResClass, accuracy)
 
 
 
@@ -142,19 +141,61 @@ def kFoldCrossValidate(data, k):
 	# Splitting the dataset in k parts.
 	partSize = len(data)/k
 	accuracyList = list()
-	for i in range(0,k):
+	print "Gaussian Naive Bayes:"
 
-		train_data = data[0:i*partSize] + data[(i+1)*partSize:]
-		test_data = data[i*partSize:(i+1)*partSize]
+	resClassList = []
+	for i in range(0, k):
+		train_data = data[0:i * partSize] + data[(i + 1) * partSize:]
+		test_data = data[i * partSize:(i + 1) * partSize]
 
 		(meanList, stdevList) = trainGaussianNB(train_data)
-		accuracy = testGaussianNB(meanList, stdevList, test_data)
-		print "For iteration: ", i+1 , " accuracy = ", accuracy
+		(predictedResClass, accuracy) = testGaussianNB(meanList, stdevList, test_data)
+		print "For iteration: ", i + 1, " accuracy = ", accuracy
+		accuracyList.append(accuracy)
+
+		resClassList += predictedResClass
+	averageAccuracy = reduce(lambda x, y: x + y, accuracyList) / len(accuracyList)
+	print "Average accuracy from cross validation: ", averageAccuracy
+
+	print "\nZero-R:"
+
+	accuracyList = []
+
+	for i in range(0,k):
+		train_data = data[0:i * partSize] + data[(i + 1) * partSize:]
+		test_data = data[i * partSize:(i + 1) * partSize]
+
+		zero_r_class = zero_R(train_data)
+		accuracy = zero_R_test(test_data, zero_r_class)
+		print "For iteration: ", i + 1, " accuracy = ", accuracy
 		accuracyList.append(accuracy)
 
 	averageAccuracy = reduce(lambda x, y: x + y, accuracyList) / len(accuracyList)
 	print "Average accuracy from cross validation: ", averageAccuracy
 
+	return resClassList
+
+def zero_R(data):
+
+	resClass = [i[10] for i in data]
+	count1 = resClass.count('1')
+	count2 = resClass.count('2')
+	if count1 > count2:
+		return '1'
+	else:
+		return '2'
+
+def zero_R_test(data, zero_r_class):
+	resClass = [i[10] for i in data]
+
+	correctPredictions = 0
+
+	for i in resClass:
+		if i == zero_r_class:
+			correctPredictions += 1
+
+	accuracy = float(correctPredictions)/len(resClass)
+	return accuracy
 
 def main():
 	filePath = 'glasshw1.csv'
@@ -162,15 +203,28 @@ def main():
 
 	#Train the Naive Bayes classifier on the given data.
 	(meanList, stdevList) = trainGaussianNB(data)
-
+	print "Mean, Variance of R.I for Class 1: ", meanList[0][0], (stdevList[0][0])**2
+	print "Mean, Variance of Calcuium for Class 2: ", meanList[1][6], (stdevList[1][6]) ** 2
 	#Test the classifier on the training data.
-	accuracy = testGaussianNB(meanList, stdevList, data)
+	(predictedClasses, accuracy) = testGaussianNB(meanList, stdevList, data)
 	print "Accuracy of Naive Bayes Classifier: ", accuracy
+
+	print "class labels for 20, 60, 100, 140, 180: " ,predictedClasses[19], predictedClasses[59], predictedClasses[99], predictedClasses[139], predictedClasses[179]
+
+	zero_r_class = zero_R(data)
+	accuracy = zero_R_test(data, zero_r_class)
+	print "Accuracy of Zero-R Classifier: ", accuracy
 
 	print "Enter k for Cross Validation: "
 	k = int(raw_input())
 
-	kFoldCrossValidate(data, k)
+	predictedClasses = kFoldCrossValidate(data, k)
+
+	print "Cross Validation: class labels for 20, 60, 100, 140, 180: ", predictedClasses[19], predictedClasses[59], predictedClasses[99], predictedClasses[139], predictedClasses[179]
+
+
+	for i in range(1, 200):
+		print str(i) + "," + str(predictedClasses[i-1])
 
 
 if __name__== "__main__":
