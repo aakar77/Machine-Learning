@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+import math
 from sklearn.linear_model import LinearRegression
 
 from sklearn.preprocessing import PolynomialFeatures
@@ -125,7 +126,7 @@ def main():
     
     plott_graph_one(displacement_test, mpg_test)
 
-    #  2 -------- Linear Regression
+    # 2 -------- Linear Regression
     
     # calling linear regression function
     linear_regression(displacement_train, mpg_train, displacement_test, mpg_test)
@@ -145,11 +146,8 @@ def main():
     # calling multiple linear regression function
     multiple_linear_regression(mlr_train, mpg_train, mlr_test, mpg_test)
     
-    
 if __name__ == "__main__":
     main()
-
-
 
 
 
