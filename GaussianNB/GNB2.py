@@ -1,4 +1,7 @@
 import math
+import csv
+
+
 import collections
 
 # This method reads file
@@ -203,6 +206,22 @@ def main():
     #k fold validation
     kfold_data = k_fold_validation(data, prior, 5)
 
+    with open('outPutFile.csv', 'wb') as myfile:
+        wr = csv.writer(myfile, quoting=csv.QUOTE_ALL)
+
+        wr.writerow("%f " % (prior['1']))
+        wr.writerow("%f " %(prior['2']))
+        wr.writerow("\n")
+
+        for key, value in all_data['class1_stat'].items():
+            wr.writerow([key, value])
+
+        wr.writerow("\n")
+
+        for key, value in all_data['class2_stat'].items():
+            wr.writerow([key, value])
+
+
     with open('outputfile.txt', 'w') as o_file:
         o_file.write('P(C1) = %s P(C2) = %s' % (prior['1'], prior['2']))
 
@@ -221,7 +240,7 @@ def main():
 
 
         o_file.write("\n\nFive-Fold Validation Probabilities \n")
-        for k, v in kfold_data["predicted_class"].iteritems(): o_file.write("%s, " %(v))
+        for k, v in kfold_data["predicted_class"].iteritems(): o_file.write("%s : %s, " %(k,v))
 
 
         o_file.write("\n\nFive-Fold Validation Average Error \n")
@@ -235,4 +254,5 @@ def main():
 
 
 if __name__ == "__main__":
+
     main()
