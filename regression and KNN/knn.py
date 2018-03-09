@@ -95,6 +95,7 @@ def find_neighbours_weighted(train_data, test_data, k):
     distance = []
     k_near_list = []
     weight_sum = float(0)
+    mpg_predict = float(0)
     
     # calculating the distance from the given point
     for i in range(0, len(train_data)):
@@ -103,30 +104,20 @@ def find_neighbours_weighted(train_data, test_data, k):
     # tup is the manhattan distance, sorting list by tuple 3
     distance.sort(key = lambda tup : tup[3]) 
 
-    '''
-    for i in range(len(distance)):
-        print(distance[i])    
-    '''    
-    mpg_predict = float(0)
-    
     # for breaking ties, as of now I am just considering index value 
     # adding the k nearest neighbour to the list
     # taking Weighted average
-    
     for i in range(k):
         k_near_list.append((distance[i][0], distance[i][1], distance[i][2]))
         
-        try:
-            inverse_distance = (1 / float(distance[i][3]))
-        except:
-            inverse_distance = 1
-            print("%s : %s : %s : %s" %(distance[i][0], distance[i][1], distance[i][2],distance[i][3]))
-            print("\n ---- For the Test value --- %f %f %f"%(test_data[0], test_data[1], test_data[2]))
-
-            print("Divide by zero error")
-
-        mpg_predict += (distance[i][2]) * inverse_distance
-        weight_sum += inverse_distance
+        # if the distance = 0, returning the point's mpg value to be most nearest so return it
+        if(distance[i][3] == 0):
+            mpg_predict = distance[i][2]
+            return(mpg_predict)
+        else:
+            inverse_distance = (1 / distance[1][3])
+            mpg_predict += (distance[i][2]) * inverse_distance
+            weight_sum += inverse_distance
     
     mpg_predict = mpg_predict / weight_sum
     
@@ -182,16 +173,23 @@ def main():
     print("Test error for k = 3 %f" %(test_error3))
     print("Test error for k = 20 %f" %(test_error20))
     
+    print("\n\nQues 6 ANSWER: \nOn Observing the test error, performance of KNN with 20 neighbours \nis better as compared to that with 3 neighbours")
+    
+    print("\n")
     
     # Weighted K Nearest Neighbor
     test_error_w1 = knn_algorithm_weighted(dataset_train.iloc[:,0:3].values, dataset_test.iloc[:,0:3].values, 1) 
-    print("\n\nWeighted KNN - Test error for k = 1 %f" %(test_error_w1))
+    print("Weighted KNN - Test error for k = 1 %f" %(test_error_w1))
     
     test_error_w3 = knn_algorithm_weighted(dataset_train.iloc[:,0:3].values, dataset_test.iloc[:,0:3].values, 3)
-    print("\n\nWeighted KNN - Test error for k = 3 %f" %(test_error_w3))
+    print("Weighted KNN - Test error for k = 3 %f" %(test_error_w3))
     
     test_error_w20 = knn_algorithm_weighted(dataset_train.iloc[:,0:3].values, dataset_test.iloc[:,0:3].values, 20)
-    print("\n\nWeighted KNN - Test error for k = 20 %f" %(test_error_w20))
+    print("Weighted KNN - Test error for k = 20 %f" %(test_error_w20))
+    
+    print("\n\nQues 7 ANSWER: \n1) We have used Manhattan distance instead of euclidean distance")
+    print("2) Taken weighted average, considering 1 / distance as weightes")
+    print("3) For those points whose distance is 0, We are directly taking that point's mpg as predicted value instead of taking weighted average")
     
 if __name__ == "__main__":
     main()
