@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt   
+import numpy as np
 
 def fx(x):
     return 16*pow(x,4) - 32*pow(x,3) - 8*pow(x,2) + 10*pow(x,1) + 9
@@ -9,14 +10,12 @@ def d_fx(x):
 # Question _ 1 for plotting the graph 
 def question_1(inter_1, inter_2):
     
-    x_val = [i for i in range(inter_1, inter_2+1)]
+    t = np.linspace(-2, 3, 1000)    # 51 points between 0 and 3
+    y = np.zeros(len(t))         # allocate y with float elements
+    for i in xrange(len(t)):
+        y[i] = fx(t[i])
     
-    y_val = []
-    y_val = [fx(i) for i in range(inter_1, inter_2+1) ]
-    
-    print(y_val)
-    
-    plt.plot(x_val, y_val, '-o')
+    plt.plot(t, y)
     plt.xlabel("x")
     plt.ylabel("f(x)")
     plt.show()
